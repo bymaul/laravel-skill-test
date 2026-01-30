@@ -7,7 +7,7 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
@@ -31,7 +31,7 @@ class PostController extends Controller
         return 'posts.create';
     }
 
-    public function store(StorePostRequest $request): RedirectResponse
+    public function store(StorePostRequest $request): JsonResponse
     {
         $this->authorize('create', Post::class);
 
@@ -39,7 +39,9 @@ class PostController extends Controller
 
         $post = Auth::user()->posts()->create($validated);
 
-        return redirect()->route('posts.show', $post);
+        $post->load('user');
+
+        return response()->json($post, 201);
     }
 
     public function show(Post $post): JsonResponse
@@ -58,7 +60,7 @@ class PostController extends Controller
         return 'posts.edit';
     }
 
-    public function update(UpdatePostRequest $request, Post $post): RedirectResponse
+    public function update(UpdatePostRequest $request, Post $post): JsonResponse
     {
         $this->authorize('update', $post);
 
@@ -66,15 +68,17 @@ class PostController extends Controller
 
         $post->update($validated);
 
-        return redirect()->route('posts.show', $post);
+        $post->load('user');
+
+        return response()->json($post, 200);
     }
 
-    public function destroy(Post $post): RedirectResponse
+    public function destroy(Post $post): Response
     {
         $this->authorize('delete', $post);
 
         $post->delete();
 
-        return redirect()->route('posts.index');
+        return response()->noContent();
     }
 }
