@@ -24,15 +24,19 @@ class StorePostRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string'],
-            'is_draft' => ['boolean'],
+            'is_draft' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'user_id' => $this->user()->id,
-        ]);
+        if (!$this->has('is_draft')) {
+            $this->merge(['is_draft' => false]);
+        }
+
+        if (!$this->has('published_at') && !$this->boolean('is_draft')) {
+            $this->merge(['published_at' => now()]);
+        }
     }
 }

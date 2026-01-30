@@ -33,11 +33,14 @@ class Post extends Model
     public function scopeActive(Builder $query): void
     {
         $query->where('is_draft', false)
+            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 
     public function isActive(): bool
     {
-        return !$this->is_draft && $this->published_at <= now();
+        return !$this->is_draft
+            && $this->published_at !== null
+            && $this->published_at <= now();
     }
 }
