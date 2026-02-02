@@ -48,6 +48,10 @@ class PostController extends Controller
     {
         $this->authorize('view', $post);
 
+        if (!$post->isActive()) {
+            abort(404);
+        }
+
         $post->load('user');
 
         return response()->json($post);
